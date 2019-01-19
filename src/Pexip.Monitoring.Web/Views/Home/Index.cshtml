@@ -1,0 +1,100 @@
+﻿@model StatisticsViewModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1>Total Conferences</h1>
+    <table class="table table-bordered">
+        <thead class="thead-strong">
+            <tr>
+                <td>Hour</td>
+                <td>Conferences Started</td>
+                <td>Conferences Ended</td>
+                <td>Delta</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var rec in Model.ConferenceModel.ConferenceStatistics)
+            {
+                <tr>
+                    <td>@rec.Hour.Hour</td>
+                    <td>@rec.ConferenceStartCount</td>
+                    <td>@rec.ConferenceEndCount</td>
+                    <td>@rec.ConferenceDelta</td>
+                </tr>
+            }
+            <tr class="tr-strong">
+                <td>TOTAL</td>
+                <td>@Model.ConferenceModel.TotalConferenceStartEvents</td>
+                <td>@Model.ConferenceModel.TotalConferenceEndEvents</td>
+                <td></td>
+            </tr>
+        </tbody>
+</table>
+
+    <h1>Participant Call Qualities</h1>
+    <table class="table table-bordered">
+        <thead class="thead-strong">
+            <tr>
+                <td>Hour</td>
+                <td>Unknown</td>
+                <td>Good</td>
+                <td>Ok</td>
+                <td>Bad</td>
+                <td>Terrible</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var rec in Model.ParticipantQualityTotals.ParticipantQualities)
+            {
+                <tr>
+                    <td>@rec.Hour.Hour</td>
+                    <td>@rec.Unknown</td>
+                    <td>@rec.Good</td>
+                    <td>@rec.Ok</td>
+                    <td>@rec.Bad</td>
+                    <td>@rec.Terrible</td>
+                </tr>
+            }
+            <tr class="tr-strong">
+                <td>TOTAL</td>
+                <td>@Model.ParticipantQualityTotals.TotalUnknown</td>
+                <td>@Model.ParticipantQualityTotals.TotalGood</td>
+                <td>@Model.ParticipantQualityTotals.TotalOk</td>
+                <td>@Model.ParticipantQualityTotals.TotalBad</td>
+                <td>@Model.ParticipantQualityTotals.TotalTerrible</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h1>Degraded Participant Media Streams</h1>
+
+    <table class="table table-bordered">
+        <thead class="thead-strong">
+            <tr>
+                <td>ParticipantId</td>
+                <td>LocalAlias</td>
+                <td>DisplayName</td>
+                <td>Protocol</td>
+                <td>StreamType</td>
+                <td>RxPacketLoss</td>
+                <td>TxPacketLoss</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var rec in Model.LossyStreams)
+            {
+                <tr>
+                    <td>@rec.ParticipantId</td>
+                    <td>@rec.LocalAlias</td>
+                    <td>@rec.DisplayName</td>
+                    <td>@rec.Protocol</td>
+                    <td>@rec.StreamType</td>
+                    <td>@rec.RxPacketLoss</td>
+                    <td>@rec.TxPacketLoss</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

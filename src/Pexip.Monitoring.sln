@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28407.52
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pexip.Monitoring.Agent", "Pexip.Monitoring.Agent\Pexip.Monitoring.Agent.csproj", "{3325262D-0481-4302-8C63-A9CAC2751442}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pexip.Monitoring.Web", "Pexip.Monitoring.Web\Pexip.Monitoring.Web.csproj", "{35A26932-6004-45E2-9498-67D141FB21E6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3325262D-0481-4302-8C63-A9CAC2751442}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3325262D-0481-4302-8C63-A9CAC2751442}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3325262D-0481-4302-8C63-A9CAC2751442}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3325262D-0481-4302-8C63-A9CAC2751442}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35A26932-6004-45E2-9498-67D141FB21E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35A26932-6004-45E2-9498-67D141FB21E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35A26932-6004-45E2-9498-67D141FB21E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35A26932-6004-45E2-9498-67D141FB21E6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0BCEF362-2653-426D-94B2-76F478B50A6B}
+	EndGlobalSection
+EndGlobal
