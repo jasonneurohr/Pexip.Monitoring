@@ -45,6 +45,9 @@ namespace Pexip.Monitoring.Agent
             // Use the ParticipantId  and the Stream's Id to make a composite PK
             modelBuilder.Entity<MediaStreamHistoryModel>()
                 .HasKey(i => new { i.ParticipantId, i.Id });
+
+            modelBuilder.Entity<ParticipantHistoryModel>()
+                .HasIndex(i => new { i.StartTime, i.EndTime, i.CallQuality });
         }
     }
 }
