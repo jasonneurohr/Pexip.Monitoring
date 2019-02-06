@@ -287,6 +287,62 @@ namespace Pexip.Monitoring.Web
         }
 
         /// <summary>
+        /// Returns a collection of ParticipantMediaStreamsWithHighLoss objects that contains attributes of participant media streams which suffered a level of packet loss
+        /// Also facilitates filtering using a protocolFilter parameter, e.g. "SIP", "WebRTC", "MSSIP"
+        /// </summary>
+        /// <remarks>
+        /// The packetLossThresholdPercentage is three by default, however, can be adjusted using the appsettings.json
+        /// </remarks>
+        /// <param name="remoteAliasFilterList"></param>
+        /// <param name="protocolFilter">SIP, MSSIP, or WebRTC</param>
+        /// <returns>ICollection<ParticipantMediaStreamsWithHighLoss></returns>
+        public ICollection<ParticipantMediaStreamsWithHighLoss> GetLossyStreams(List<string> remoteAliasFilterList, string protocolFilter, int packetLossThresholdPercentage = 3)
+        {
+
+            var today = new DateTimeOffset(DateTimeOffset.UtcNow.ToLocalTime().Date).ToUnixTimeSeconds();
+            var tomorrow = new DateTimeOffset(DateTimeOffset.UtcNow.ToLocalTime().Date).AddDays(1).ToUnixTimeSeconds();
+
+            var lossyParticipants = _context.MediaStreamHistory.Join(_context.ParticipantHistory,
+                a => a.ParticipantId,
+                b => b.ParticipantId,
+                (a, b) => new {
+                    a.ParticipantId,
+                    b.DisplayName,
+                    b.LocalAlias,
+                    a.RxPacketLoss,
+                    a.TxPacketLoss,
+                    a.StreamType,
+                    b.Protocol,
+                    a.StartTime
+                })
+                .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= today && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() <= tomorrow && (i.RxPacketLoss >= packetLossThresholdPercentage || i.TxPacketLoss >= packetLossThresholdPercentage) && i.Protocol == protocolFilter)
+                .Select(i => new ParticipantMediaStreamsWithHighLoss
+                {
+                    ParticipantId = i.ParticipantId,
+                    DisplayName = i.DisplayName,
+                    LocalAlias = i.LocalAlias,
+                    RxPacketLoss = i.RxPacketLoss,
+                    TxPacketLoss = i.TxPacketLoss,
+                    StreamType = i.StreamType,
+                    Protocol = i.Protocol
+                })
+                .ToList();
+
+            // Device Filter - If the device matches the filter based on the RemoteAlias it will not be added to the filtered list
+            ICollection<ParticipantMediaStreamsWithHighLoss> filteredLossyParticipants = new List<ParticipantMediaStreamsWithHighLoss>();
+
+            foreach (var rec in lossyParticipants)
+            {
+                if (!Filter(rec.DisplayName, remoteAliasFilterList))
+                {
+                    filteredLossyParticipants.Add(rec);
+                }
+            }
+
+            return filteredLossyParticipants;
+        }
+
+        /// <summary>
         /// Returns a collection of ParticipantMediaStreamsWithHighLoss objects that contains attributes of participant media streams which suffered a level of packet loss with a date param to base the query on an alternate date
         /// </summary>
         /// <remarks>
@@ -314,6 +370,62 @@ namespace Pexip.Monitoring.Web
                     a.StartTime
                 })
                 .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= today && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() <= tomorrow && (i.RxPacketLoss >= packetLossThresholdPercentage || i.TxPacketLoss >= packetLossThresholdPercentage))
+                .Select(i => new ParticipantMediaStreamsWithHighLoss
+                {
+                    ParticipantId = i.ParticipantId,
+                    DisplayName = i.DisplayName,
+                    LocalAlias = i.LocalAlias,
+                    RxPacketLoss = i.RxPacketLoss,
+                    TxPacketLoss = i.TxPacketLoss,
+                    StreamType = i.StreamType,
+                    Protocol = i.Protocol
+                })
+                .ToList();
+
+            // Device Filter - If the device matches the filter based on the RemoteAlias it will not be added to the filtered list
+            ICollection<ParticipantMediaStreamsWithHighLoss> filteredLossyParticipants = new List<ParticipantMediaStreamsWithHighLoss>();
+
+            foreach (var rec in lossyParticipants)
+            {
+                if (!Filter(rec.DisplayName, remoteAliasFilterList))
+                {
+                    filteredLossyParticipants.Add(rec);
+                }
+            }
+
+            return filteredLossyParticipants;
+        }
+
+        /// <summary>
+        /// Returns a collection of ParticipantMediaStreamsWithHighLoss objects that contains attributes of participant media streams which suffered a level of packet loss with a date param to base the query on an alternate date
+        /// Also facilitates filtering using a protocolFilter parameter, e.g. "SIP", "WebRTC", "MSSIP"
+        /// </summary>
+        /// <remarks>
+        /// The packetLossThresholdPercentage is three by default, however, can be adjusted using the appsettings.json
+        /// </remarks>
+        /// <param name="remoteAliasFilterList"></param>
+        /// <param name="protocolFilter">SIP, MSSIP, or WebRTC</param>
+        /// <param name="date"></param>
+        /// <returns></returns>
+        public ICollection<ParticipantMediaStreamsWithHighLoss> GetLossyStreams(List<string> remoteAliasFilterList, DateTimeOffset date, string protocolFilter, int packetLossThresholdPercentage = 3)
+        {
+            var today = date.ToUnixTimeSeconds();
+            var tomorrow = date.AddDays(1).ToUnixTimeSeconds();
+
+            var lossyParticipants = _context.MediaStreamHistory.Join(_context.ParticipantHistory,
+                a => a.ParticipantId,
+                b => b.ParticipantId,
+                (a, b) => new {
+                    a.ParticipantId,
+                    b.DisplayName,
+                    b.LocalAlias,
+                    a.RxPacketLoss,
+                    a.TxPacketLoss,
+                    a.StreamType,
+                    b.Protocol,
+                    a.StartTime
+                })
+                .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= today && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() <= tomorrow && (i.RxPacketLoss >= packetLossThresholdPercentage || i.TxPacketLoss >= packetLossThresholdPercentage) && i.Protocol == protocolFilter)
                 .Select(i => new ParticipantMediaStreamsWithHighLoss
                 {
                     ParticipantId = i.ParticipantId,

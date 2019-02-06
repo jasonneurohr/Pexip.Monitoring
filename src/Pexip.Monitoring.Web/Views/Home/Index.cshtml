@@ -31,7 +31,7 @@
                 <td></td>
             </tr>
         </tbody>
-</table>
+    </table>
 
     <h1>Participant Call Qualities</h1>
     <table class="table table-bordered">
@@ -68,7 +68,7 @@
         </tbody>
     </table>
 
-    <h1>Degraded Participant Media Streams</h1>
+    <h1>Degraded SIP Participant Media Streams</h1>
 
     <table class="table table-bordered">
         <thead class="thead-strong">
@@ -83,7 +83,67 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var rec in Model.LossyStreams)
+            @foreach (var rec in Model.LossySIPStreams)
+            {
+                <tr>
+                    <td>@rec.ParticipantId</td>
+                    <td>@rec.LocalAlias</td>
+                    <td>@rec.DisplayName</td>
+                    <td>@rec.Protocol</td>
+                    <td>@rec.StreamType</td>
+                    <td>@rec.RxPacketLoss</td>
+                    <td>@rec.TxPacketLoss</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h1>Degraded WebRTC Participant Media Streams</h1>
+
+    <table class="table table-bordered">
+        <thead class="thead-strong">
+            <tr>
+                <td>ParticipantId</td>
+                <td>LocalAlias</td>
+                <td>DisplayName</td>
+                <td>Protocol</td>
+                <td>StreamType</td>
+                <td>RxPacketLoss</td>
+                <td>TxPacketLoss</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var rec in Model.LossyWebRTCStreams)
+            {
+                <tr>
+                    <td>@rec.ParticipantId</td>
+                    <td>@rec.LocalAlias</td>
+                    <td>@rec.DisplayName</td>
+                    <td>@rec.Protocol</td>
+                    <td>@rec.StreamType</td>
+                    <td>@rec.RxPacketLoss</td>
+                    <td>@rec.TxPacketLoss</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h1>Degraded MSSIP (Skype for Business) Participant Media Streams</h1>
+
+    <table class="table table-bordered">
+        <thead class="thead-strong">
+            <tr>
+                <td>ParticipantId</td>
+                <td>LocalAlias</td>
+                <td>DisplayName</td>
+                <td>Protocol</td>
+                <td>StreamType</td>
+                <td>RxPacketLoss</td>
+                <td>TxPacketLoss</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var rec in Model.LossyMSSIPStreams)
             {
                 <tr>
                     <td>@rec.ParticipantId</td>
