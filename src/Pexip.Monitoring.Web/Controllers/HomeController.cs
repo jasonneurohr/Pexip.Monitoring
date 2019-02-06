@@ -23,7 +23,16 @@ namespace Pexip.Monitoring.Web.Controllers
             return View(new StatisticsViewModel
             {
                 ParticipantQualityTotals = _service.GetParticipantQualityTotals(),
-                LossyStreams = _service.GetLossyStreams(_config.Value.FilterList),
+                //LossyStreams = _service.GetLossyStreams(_config.Value.FilterList),
+                LossySIPStreams = _service.GetLossyStreams(
+                    _config.Value.FilterList,
+                    "SIP", _config.Value.PacketLossThresholdPercentage),
+                LossyMSSIPStreams = _service.GetLossyStreams(
+                    _config.Value.FilterList,
+                    "MSSIP", _config.Value.PacketLossThresholdPercentage),
+                LossyWebRTCStreams = _service.GetLossyStreams(
+                    _config.Value.FilterList,
+                    "WebRTC", _config.Value.PacketLossThresholdPercentage),
                 ConferenceModel = _service.GetConferenceStatistics()
             });
         }
@@ -35,12 +44,24 @@ namespace Pexip.Monitoring.Web.Controllers
             {
                 ParticipantQualityTotals = _service.GetParticipantQualityTotals(
                     DateTimeOffset.Parse(Request.Form["reportdate"])),
-                LossyStreams = _service.GetLossyStreams(
+                //LossyStreams = _service.GetLossyStreams(
+                //    _config.Value.FilterList,
+                //    DateTimeOffset.Parse(Request.Form["reportdate"]),
+                //    _config.Value.PacketLossThresholdPercentage),
+                ConferenceModel = _service.GetConferenceStatistics(
+                    DateTimeOffset.Parse(Request.Form["reportdate"])),
+                LossySIPStreams = _service.GetLossyStreams(
                     _config.Value.FilterList,
                     DateTimeOffset.Parse(Request.Form["reportdate"]),
-                    _config.Value.PacketLossThresholdPercentage),
-                ConferenceModel = _service.GetConferenceStatistics(
-                    DateTimeOffset.Parse(Request.Form["reportdate"]))
+                    "SIP", _config.Value.PacketLossThresholdPercentage),
+                LossyMSSIPStreams = _service.GetLossyStreams(
+                    _config.Value.FilterList,
+                    DateTimeOffset.Parse(Request.Form["reportdate"]),
+                    "MSSIP", _config.Value.PacketLossThresholdPercentage),
+                LossyWebRTCStreams = _service.GetLossyStreams(
+                    _config.Value.FilterList,
+                    DateTimeOffset.Parse(Request.Form["reportdate"]),
+                    "WebRTC", _config.Value.PacketLossThresholdPercentage)
             });
         }
 
