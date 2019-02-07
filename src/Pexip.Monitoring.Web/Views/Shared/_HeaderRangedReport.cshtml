@@ -1,0 +1,12 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<form class="form-inline my-2 my-lg-0" asp-action="RangedReport" asp-controller="Home" method="post">
+    <label>Start date&nbsp;</label>
+        <input type="date" name="reportDateStart" pattern="[0-9]{2}/[0-9]{2}/20[0-9]{2}" title="The date in format dd/mm/yyyy" placeholder="dd/mm/yyyy" required />
+        <label>&nbsp;End date&nbsp;</label>
+        <input type="date" name="reportDateEnd" pattern="[0-9]{2}/[0-9]{2}/20[0-9]{2}" title="The date in format dd/mm/yyyy" placeholder="dd/mm/yyyy" />
+        <button type="submit" value="Submit" class="btn">&nbsp;Submit</button>
+</form>

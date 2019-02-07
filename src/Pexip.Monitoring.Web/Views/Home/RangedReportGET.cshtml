@@ -1,0 +1,12 @@
+﻿@model StatisticsViewModel
+@{
+    ViewData["Title"] = "Ranged Report";
+}
+<div class="d-print-none">
+    <table>
+        <tr>
+            <td>Select the date to report on </td>
+            <td>@await Html.PartialAsync("~/Views/Shared/_HeaderRangedReport.cshtml")</td>
+        </tr>
+    </table>
+</div>

@@ -20,34 +20,36 @@ namespace Pexip.Monitoring.Web.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            return View(new StatisticsViewModel
+            return View("~/Views/Home/IndexGET.cshtml");
+        }
+
+        [HttpGet("/rangedreport")]
+        public IActionResult RangedReport()
+        {
+            return View("~/Views/Home/RangedReportGET.cshtml");
+        }
+
+        [HttpPost("/rangedreport")]
+        public IActionResult RangedReportWithDates()
+        {
+            return View("~/Views/Home/RangedReportPOST.cshtml", new StatisticsPerDayViewModel
             {
-                ParticipantQualityTotals = _service.GetParticipantQualityTotals(),
-                //LossyStreams = _service.GetLossyStreams(_config.Value.FilterList),
-                LossySIPStreams = _service.GetLossyStreams(
-                    _config.Value.FilterList,
-                    "SIP", _config.Value.PacketLossThresholdPercentage),
-                LossyMSSIPStreams = _service.GetLossyStreams(
-                    _config.Value.FilterList,
-                    "MSSIP", _config.Value.PacketLossThresholdPercentage),
-                LossyWebRTCStreams = _service.GetLossyStreams(
-                    _config.Value.FilterList,
-                    "WebRTC", _config.Value.PacketLossThresholdPercentage),
-                ConferenceModel = _service.GetConferenceStatistics()
+                ParticipantQualityTotals = _service.GetParticipantQualityTotalsPerDay(
+                    DateTimeOffset.Parse(Request.Form["reportDateStart"]),
+                    DateTimeOffset.Parse(Request.Form["reportDateEnd"])),
+                ConferencesPerDayModel = _service.GetConferenceStatisticsPerDay(
+                    DateTimeOffset.Parse(Request.Form["reportDateStart"]),
+                    DateTimeOffset.Parse(Request.Form["reportDateEnd"]))
             });
         }
 
         [HttpPost("/")]
         public IActionResult IndexWithDate()
         {
-            return View("Index", new StatisticsViewModel
+            return View("~/Views/Home/IndexPOST.cshtml", new StatisticsViewModel
             {
                 ParticipantQualityTotals = _service.GetParticipantQualityTotals(
                     DateTimeOffset.Parse(Request.Form["reportdate"])),
-                //LossyStreams = _service.GetLossyStreams(
-                //    _config.Value.FilterList,
-                //    DateTimeOffset.Parse(Request.Form["reportdate"]),
-                //    _config.Value.PacketLossThresholdPercentage),
                 ConferenceModel = _service.GetConferenceStatistics(
                     DateTimeOffset.Parse(Request.Form["reportdate"])),
                 LossySIPStreams = _service.GetLossyStreams(
