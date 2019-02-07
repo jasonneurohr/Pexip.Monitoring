@@ -7,33 +7,24 @@
 
     <environment include="Development">
         <link rel="stylesheet" href="~/css/bootstrap.css" />
-        <link rel="stylesheet" href="~/css/site.css" />
-        <script src="~/js/Chart.bundle.js"></script>
     </environment>
     <environment exclude="Development">
         <link rel="stylesheet" href="~/css/bootstrap.min.css" />
-        <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
-        <script src="~/js/Chart.bundle.js"></script>
     </environment>
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
 <body>
+    
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Pexip Monitor</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
-                    <form class="form-inline my-2 my-lg-0" asp-action="Index" asp-controller="Home" method="post">
-                        <label>Select Day: </label>
-                        <input type="date" name="reportDate" pattern="[0-9]{2}/[0-9]{2}/20[0-9]{2}" title="The date in format dd/mm/yyyy" placeholder="dd/mm/yyyy"/>
-                        <button type="submit" value="Submit" class="btn">Submit</button>
-                    </form>
+        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-item nav-link active" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                    <a class="nav-item nav-link active" asp-area="" asp-controller="Home" asp-action="rangedreport">Ranged Report</a>
                 </div>
-            </div>
         </nav>
     </header>
     <div class="container">

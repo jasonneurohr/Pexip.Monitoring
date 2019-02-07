@@ -1,0 +1,77 @@
+﻿@model StatisticsPerDayViewModel
+@{
+    ViewData["Title"] = "RangedReport";
+}
+<div class="d-print-none">
+    <table>
+        <tr>
+            <td>Select the date to report on </td>
+            <td>@await Html.PartialAsync("~/Views/Shared/_HeaderRangedReport.cshtml")</td>
+        </tr>
+    </table>
+</div>
+<div class="text-center">
+    <h1>Total Conferences</h1>
+    <table class="table table-bordered">
+        <thead class="thead-strong">
+            <tr>
+                <td>Hour</td>
+                <td>Conferences Started</td>
+                <td>Conferences Ended</td>
+                <td>Delta</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var rec in Model.ConferencesPerDayModel.ConferenceStatistics)
+            {
+                <tr>
+                    <td>@rec.Day.ToLocalTime().ToShortDateString()</td>
+                    <td>@rec.ConferenceStartCount</td>
+                    <td>@rec.ConferenceEndCount</td>
+                    <td>@rec.ConferenceDelta</td>
+                </tr>
+            }
+            <tr class="tr-strong">
+                <td>TOTAL</td>
+                <td>@Model.ConferencesPerDayModel.TotalConferenceStartEvents</td>
+                <td>@Model.ConferencesPerDayModel.TotalConferenceEndEvents</td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h1>Participant Call Qualities</h1>
+    <table class="table table-bordered">
+        <thead class="thead-strong">
+            <tr>
+                <td>Hour</td>
+                <td>Unknown</td>
+                <td>Good (0-1%)</td>
+                <td>Ok (1-3%)</td>
+                <td>Bad (3-10%)</td>
+                <td>Terrible (10+%)</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var rec in Model.ParticipantQualityTotals.ParticipantQualities)
+            {
+                <tr>
+                    <td>@rec.Day.ToLocalTime().ToShortDateString()</td>
+                    <td>@rec.Unknown</td>
+                    <td>@rec.Good</td>
+                    <td>@rec.Ok</td>
+                    <td>@rec.Bad</td>
+                    <td>@rec.Terrible</td>
+                </tr>
+            }
+            <tr class="tr-strong">
+                <td>TOTAL</td>
+                <td>@Model.ParticipantQualityTotals.TotalUnknown</td>
+                <td>@Model.ParticipantQualityTotals.TotalGood</td>
+                <td>@Model.ParticipantQualityTotals.TotalOk</td>
+                <td>@Model.ParticipantQualityTotals.TotalBad</td>
+                <td>@Model.ParticipantQualityTotals.TotalTerrible</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

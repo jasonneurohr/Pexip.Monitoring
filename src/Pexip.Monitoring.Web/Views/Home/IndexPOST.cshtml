@@ -2,7 +2,14 @@
 @{
     ViewData["Title"] = "Home Page";
 }
-
+<div class="d-print-none">
+    <table>
+        <tr>
+            <td>Select the date to report on</td>
+            <td>@await Html.PartialAsync("~/Views/Shared/_HeaderDefault.cshtml")</td>
+        </tr>
+    </table>
+</div>
 <div class="text-center">
     <h1>Total Conferences</h1>
     <table class="table table-bordered">

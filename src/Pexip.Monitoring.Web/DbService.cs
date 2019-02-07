@@ -19,7 +19,7 @@ namespace Pexip.Monitoring.Web
         #region statistics methods
 
         /// <summary>
-        /// Returns a conferenceModel object consisting of the conferences per hour (started, stopped, and delta) for the current day
+        /// Returns a conferenceModel object consisting of the conferences per hour for the current day
         /// </summary>
         /// <returns>ConferenceModel</returns>
         public ConferenceModel GetConferenceStatistics()
@@ -34,8 +34,8 @@ namespace Pexip.Monitoring.Web
                 var timeWindowStart = hourly.AddHours(hour).ToUnixTimeSeconds();
                 var timeWindowEnd = hourly.AddHours(hour + 1).ToUnixTimeSeconds();
 
-                var conferenceStartCount = _context.ConferenceHistory.Where(i => (DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() <= timeWindowEnd)).Count();
-                var conferenceEndCount = _context.ConferenceHistory.Where(i => (DateTimeOffset.FromUnixTimeSeconds(i.EndTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.EndTime).ToLocalTime().ToUnixTimeSeconds() <= timeWindowEnd)).Count();
+                var conferenceStartCount = _context.ConferenceHistory.Where(i => (DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() < timeWindowEnd)).Count();
+                var conferenceEndCount = _context.ConferenceHistory.Where(i => (DateTimeOffset.FromUnixTimeSeconds(i.EndTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.EndTime).ToLocalTime().ToUnixTimeSeconds() < timeWindowEnd)).Count();
 
                 var conferenceDelta = (conferenceStartCount >= conferenceEndCount) ? conferenceStartCount - conferenceEndCount : conferenceEndCount - conferenceStartCount;
 
@@ -63,7 +63,7 @@ namespace Pexip.Monitoring.Web
         }
 
         /// <summary>
-        /// Returns a ConferenceModel object consisting of the conferences per hour (started, stopped, and delta) for the current day with a date param to base the query on an alternate date
+        /// Returns a ConferenceModel object consisting of the conferences per hour for a specified date
         /// </summary>
         /// <param name="date"></param>
         /// <returns>ConferenceModel</returns>
@@ -79,8 +79,8 @@ namespace Pexip.Monitoring.Web
                 var timeWindowStart = hourly.AddHours(hour).ToUnixTimeSeconds();
                 var timeWindowEnd = hourly.AddHours(hour + 1).ToUnixTimeSeconds();
 
-                var conferenceStartCount = _context.ConferenceHistory.Where(i => (DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() <= timeWindowEnd)).Count();
-                var conferenceEndCount = _context.ConferenceHistory.Where(i => (DateTimeOffset.FromUnixTimeSeconds(i.EndTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.EndTime).ToLocalTime().ToUnixTimeSeconds() <= timeWindowEnd)).Count();
+                var conferenceStartCount = _context.ConferenceHistory.Where(i => (DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() < timeWindowEnd)).Count();
+                var conferenceEndCount = _context.ConferenceHistory.Where(i => (DateTimeOffset.FromUnixTimeSeconds(i.EndTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.EndTime).ToLocalTime().ToUnixTimeSeconds() < timeWindowEnd)).Count();
 
                 var conferenceDelta = (conferenceStartCount >= conferenceEndCount) ? conferenceStartCount - conferenceEndCount : conferenceEndCount - conferenceStartCount;
 
@@ -108,7 +108,54 @@ namespace Pexip.Monitoring.Web
         }
 
         /// <summary>
-        /// Returns a ParticipantQualityTotals object consisting of the CallQuality totals per hour for the current day
+        /// Returns a ConferencesPerDayModel object of the confernces per day for the specified duration
+        /// </summary>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <returns>ConferencesPerDayModel</returns>
+        public ConferencesPerDayModel GetConferenceStatisticsPerDay(DateTimeOffset startDate, DateTimeOffset endDate)
+        {
+            ICollection<ConferenceStatisticsPerDayModel> conferenceTotalsPerDay = new List<ConferenceStatisticsPerDayModel>();
+
+            int numOfDays = (endDate - startDate).Days + 1;
+
+            int dayCount = 0;
+
+            while (dayCount <= numOfDays)
+            {
+                var timeWindowStart = startDate.AddDays(dayCount).ToUnixTimeSeconds();
+                var timeWindowEnd = startDate.AddDays(dayCount + 1).ToUnixTimeSeconds();
+
+                var conferenceStartCount = _context.ConferenceHistory.Where(i => (DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() < timeWindowEnd)).Count();
+                var conferenceEndCount = _context.ConferenceHistory.Where(i => (DateTimeOffset.FromUnixTimeSeconds(i.EndTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.EndTime).ToLocalTime().ToUnixTimeSeconds() < timeWindowEnd)).Count();
+
+                var conferenceDelta = (conferenceStartCount >= conferenceEndCount) ? conferenceStartCount - conferenceEndCount : conferenceEndCount - conferenceStartCount;
+
+                conferenceTotalsPerDay.Add(new ConferenceStatisticsPerDayModel()
+                {
+                    Day = DateTimeOffset.FromUnixTimeSeconds(timeWindowStart).Date,
+                    ConferenceStartCount = conferenceStartCount,
+                    ConferenceEndCount = conferenceEndCount,
+                    ConferenceDelta = conferenceDelta
+                });
+
+                dayCount++;
+            }
+
+            var totalConferenceStarts = conferenceTotalsPerDay.Sum(i => i.ConferenceStartCount);
+
+            ConferencesPerDayModel conferenceModel = new ConferencesPerDayModel()
+            {
+                ConferenceStatistics = conferenceTotalsPerDay,
+                TotalConferenceStartEvents = conferenceTotalsPerDay.Sum(i => i.ConferenceStartCount),
+                TotalConferenceEndEvents = conferenceTotalsPerDay.Sum(i => i.ConferenceEndCount)
+            };
+
+            return conferenceModel;
+        }
+
+        /// <summary>
+        /// Returns a ParticipantQualityTotals object per hour for the current day
         /// </summary>
         /// <returns>ParticipantQualityTotals</returns>
         public ParticipantQualityTotals GetParticipantQualityTotals()
@@ -124,23 +171,23 @@ namespace Pexip.Monitoring.Web
                 var timeWindowEnd = hourly.AddHours(hour + 1).ToUnixTimeSeconds();
 
                 var unknown = _context.ParticipantHistory
-                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() <= timeWindowEnd && i.CallQuality == "0_unknown")
+                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() < timeWindowEnd && i.CallQuality == "0_unknown")
                     .Select(i => i.CallQuality).Count();
 
                 var good = _context.ParticipantHistory
-                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() <= timeWindowEnd && i.CallQuality == "1_good")
+                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() < timeWindowEnd && i.CallQuality == "1_good")
                     .Select(i => i.CallQuality).Count();
 
                 var ok = _context.ParticipantHistory
-                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() <= timeWindowEnd && i.CallQuality == "2_ok")
+                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() < timeWindowEnd && i.CallQuality == "2_ok")
                     .Select(i => i.CallQuality).Count();
 
                 var bad = _context.ParticipantHistory
-                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() <= timeWindowEnd && i.CallQuality == "3_bad")
+                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() < timeWindowEnd && i.CallQuality == "3_bad")
                     .Select(i => i.CallQuality).Count();
 
                 var terrible = _context.ParticipantHistory
-                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() <= timeWindowEnd && i.CallQuality == "4_terrible")
+                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() < timeWindowEnd && i.CallQuality == "4_terrible")
                     .Select(i => i.CallQuality).Count();
 
                 qualityTotalsPerHour.Add(new ParticipantQualityTotalsModel()
@@ -170,7 +217,7 @@ namespace Pexip.Monitoring.Web
         }
 
         /// <summary>
-        /// Returns a ParticipantQualityTotals object consisting of the CallQuality totals with a date param to base the query on an alternate date
+        /// Returns a ParticipantQualityTotals object per hour for a specified date
         /// </summary>
         /// <param name="date"></param>
         /// <returns>ParticipantQualityTotals</returns>
@@ -187,23 +234,23 @@ namespace Pexip.Monitoring.Web
                 var timeWindowEnd = hourly.AddHours(hour + 1).ToUnixTimeSeconds();
 
                 var unknown = _context.ParticipantHistory
-                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() <= timeWindowEnd && i.CallQuality == "0_unknown")
+                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() < timeWindowEnd && i.CallQuality == "0_unknown")
                     .Select(i => i.CallQuality).Count();
 
                 var good = _context.ParticipantHistory
-                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() <= timeWindowEnd && i.CallQuality == "1_good")
+                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() < timeWindowEnd && i.CallQuality == "1_good")
                     .Select(i => i.CallQuality).Count();
 
                 var ok = _context.ParticipantHistory
-                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() <= timeWindowEnd && i.CallQuality == "2_ok")
+                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() < timeWindowEnd && i.CallQuality == "2_ok")
                     .Select(i => i.CallQuality).Count();
 
                 var bad = _context.ParticipantHistory
-                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() <= timeWindowEnd && i.CallQuality == "3_bad")
+                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() < timeWindowEnd && i.CallQuality == "3_bad")
                     .Select(i => i.CallQuality).Count();
 
                 var terrible = _context.ParticipantHistory
-                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() <= timeWindowEnd && i.CallQuality == "4_terrible")
+                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() < timeWindowEnd && i.CallQuality == "4_terrible")
                     .Select(i => i.CallQuality).Count();
 
                 qualityTotalsPerHour.Add(new ParticipantQualityTotalsModel()
@@ -233,12 +280,78 @@ namespace Pexip.Monitoring.Web
         }
 
         /// <summary>
-        /// Returns a collection of ParticipantMediaStreamsWithHighLoss objects that contains attributes of participant media streams which suffered a level of packet loss
+        /// Returns a ParticipantQualityTotals object per day for the specified duration
+        /// </summary>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <returns>ParticipantQualityTotals</returns>
+        public ParticipantQualityTotalsPerDay GetParticipantQualityTotalsPerDay(DateTimeOffset startDate, DateTimeOffset endDate)
+        {
+            ICollection<ParticipantQualityTotalsPerDayModel> qualityTotalsPerDay = new List<ParticipantQualityTotalsPerDayModel>();
+
+            int numOfDays = (endDate - startDate).Days + 1;
+
+            int dayCount = 0;
+
+            while (dayCount <= numOfDays)
+            {
+                var timeWindowStart = startDate.AddDays(dayCount).ToLocalTime().ToUnixTimeSeconds();
+                var timeWindowEnd = startDate.AddDays(dayCount + 1).ToLocalTime().ToUnixTimeSeconds();
+
+                var unknown = _context.ParticipantHistory
+                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() < timeWindowEnd && i.CallQuality == "0_unknown")
+                    .Select(i => i.CallQuality).Count();
+
+                var good = _context.ParticipantHistory
+                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() < timeWindowEnd && i.CallQuality == "1_good")
+                    .Select(i => i.CallQuality).Count();
+
+                var ok = _context.ParticipantHistory
+                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() < timeWindowEnd && i.CallQuality == "2_ok")
+                    .Select(i => i.CallQuality).Count();
+
+                var bad = _context.ParticipantHistory
+                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() < timeWindowEnd && i.CallQuality == "3_bad")
+                    .Select(i => i.CallQuality).Count();
+
+                var terrible = _context.ParticipantHistory
+                    .Where(i => DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() >= timeWindowStart && DateTimeOffset.FromUnixTimeSeconds(i.StartTime).ToLocalTime().ToUnixTimeSeconds() < timeWindowEnd && i.CallQuality == "4_terrible")
+                    .Select(i => i.CallQuality).Count();
+
+                qualityTotalsPerDay.Add(new ParticipantQualityTotalsPerDayModel()
+                {
+                    Day = DateTimeOffset.FromUnixTimeSeconds(timeWindowStart).Date,
+                    Unknown = unknown,
+                    Good = good,
+                    Ok = ok,
+                    Bad = bad,
+                    Terrible = terrible
+                });
+
+                dayCount++;
+            }
+
+            ParticipantQualityTotalsPerDay participantQualityTotals = new ParticipantQualityTotalsPerDay
+            {
+                ParticipantQualities = qualityTotalsPerDay,
+                TotalUnknown = qualityTotalsPerDay.Sum(i => i.Unknown),
+                TotalGood = qualityTotalsPerDay.Sum(i => i.Good),
+                TotalOk = qualityTotalsPerDay.Sum(i => i.Ok),
+                TotalBad = qualityTotalsPerDay.Sum(i => i.Bad),
+                TotalTerrible = qualityTotalsPerDay.Sum(i => i.Terrible)
+            };
+
+            return participantQualityTotals;
+        }
+
+        /// <summary>
+        /// Returns a collection of ParticipantMediaStreamsWithHighLoss objects
         /// </summary>
         /// <remarks>
         /// The packetLossThresholdPercentage is three by default, however, can be adjusted using the appsettings.json
         /// </remarks>
         /// <param name="remoteAliasFilterList"></param>
+        /// <param name="packetLossThresholdPercentage"></param>
         /// <returns>ICollection<ParticipantMediaStreamsWithHighLoss></returns>
         public ICollection<ParticipantMediaStreamsWithHighLoss> GetLossyStreams(List<string> remoteAliasFilterList, int packetLossThresholdPercentage=3)
         {
@@ -287,11 +400,11 @@ namespace Pexip.Monitoring.Web
         }
 
         /// <summary>
-        /// Returns a collection of ParticipantMediaStreamsWithHighLoss objects that contains attributes of participant media streams which suffered a level of packet loss
-        /// Also facilitates filtering using a protocolFilter parameter, e.g. "SIP", "WebRTC", "MSSIP"
+        /// Returns a collection of ParticipantMediaStreamsWithHighLoss objects
         /// </summary>
         /// <remarks>
         /// The packetLossThresholdPercentage is three by default, however, can be adjusted using the appsettings.json
+        /// Facilitates filtering using a protocolFilter parameter, e.g. "SIP", "WebRTC", "MSSIP".
         /// </remarks>
         /// <param name="remoteAliasFilterList"></param>
         /// <param name="protocolFilter">SIP, MSSIP, or WebRTC</param>
@@ -343,7 +456,7 @@ namespace Pexip.Monitoring.Web
         }
 
         /// <summary>
-        /// Returns a collection of ParticipantMediaStreamsWithHighLoss objects that contains attributes of participant media streams which suffered a level of packet loss with a date param to base the query on an alternate date
+        /// Returns a collection of ParticipantMediaStreamsWithHighLoss objects
         /// </summary>
         /// <remarks>
         /// The packetLossThresholdPercentage is three by default, however, can be adjusted using the appsettings.json
@@ -397,11 +510,11 @@ namespace Pexip.Monitoring.Web
         }
 
         /// <summary>
-        /// Returns a collection of ParticipantMediaStreamsWithHighLoss objects that contains attributes of participant media streams which suffered a level of packet loss with a date param to base the query on an alternate date
-        /// Also facilitates filtering using a protocolFilter parameter, e.g. "SIP", "WebRTC", "MSSIP"
+        /// Returns a collection of ParticipantMediaStreamsWithHighLoss
         /// </summary>
         /// <remarks>
         /// The packetLossThresholdPercentage is three by default, however, can be adjusted using the appsettings.json
+        /// Facilitates filtering using a protocolFilter parameter, e.g. "SIP", "WebRTC", "MSSIP".
         /// </remarks>
         /// <param name="remoteAliasFilterList"></param>
         /// <param name="protocolFilter">SIP, MSSIP, or WebRTC</param>
@@ -455,7 +568,7 @@ namespace Pexip.Monitoring.Web
         /// <summary>
         /// Used to filter the Aliases based on the filter list from the appsettings.json
         /// </summary>
-        /// <param name="s"></param>
+        /// <param name="s">The alias to check</param>
         /// <param name="remoteAliasFilterList"></param>
         /// <returns>bool</returns>
         public bool Filter(string s, List<string> remoteAliasFilterList)
