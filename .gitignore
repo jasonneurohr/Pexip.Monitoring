@@ -349,3 +349,8 @@ healthchecksdb
 
 appsettings.Development.json
 Migrations/
+.vscode
+
+src/dbcleanup/*.db
+src/dbcleanup/dbcleanup.exe
+src/dbcleanup/dbcleanup

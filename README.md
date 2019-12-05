@@ -66,6 +66,19 @@ Refer to [Host and deploy ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/
       "Endpoint One",
       "Endpoint Two"
     ]
+  },
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Debug",
+      "Override": {
+        "System": "Information",
+        "Microsoft": "Information"
+      }
+    },
+    "WriteTo": [
+      { "Name": "File", "Args": { "path": "PATH TO LOG FILE"}}
+    ],
+    "Enrich": [ "FromLogContext" ]
   }
 }
 ```
@@ -79,6 +92,48 @@ Once the installation has been completed successfully simply browse to the web i
 ![](docs/img/web_view_002.png)
 
 ![](docs/img/web_view_003.png)
+
+# Development
+
+Configure the environment to be `Development`
+
+Command prompt
+
+```
+set ASPNETCORE_ENVIRONMENT=Development
+```
+
+PowerShell
+
+```
+$Env:ASPNETCORE_ENVIRONMENT = "Development"
+```
+
+# dbcleanup
+
+dbcleanup is a small utility writtin in go which can be used to:
+
+* count the number of records in each database table
+* delete records from all database tables
+
+Both of the above can be provided a `duration` value in the format of <numberOfHours>h. e.g. `5h` indicating that the operation will include records older then *now*-5 hours. If duration is not provided `0h` is used.
+
+## requirements
+
+dbcleanup relies on the cgo package [go-sqlite3](!https://github.com/mattn/go-sqlite3)
+
+gcc is required - refer to the package page above.
+
+For cross compilation a cross compiler is required. An example for a Ubuntu compiling for windows is in the following section. Refer to the issues also noted on the package page, [#491](https://github.com/mattn/go-sqlite3/issues/491) & [#560](https://github.com/mattn/go-sqlite3/issues/560).
+
+## compilation
+
+Compiling for Windows from Ubuntu
+
+```bash
+sudo apt-get install gcc-mingw-w64
+env GOOS=windows GOARCH=amd64 CC=x86_64-w64-mingw32-gcc CGO_ENABLED=1 go build
+```
 
 # License
 

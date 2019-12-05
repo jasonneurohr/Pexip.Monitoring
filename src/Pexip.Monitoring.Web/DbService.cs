@@ -4,16 +4,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Pexip.Monitoring.Web.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Pexip.Monitoring.Web
 {
     public class DbService
     {
         readonly SQLiteContext _context;
+        private readonly ILogger<DbService> _logger;
 
-        public DbService(SQLiteContext context)
+        public DbService(SQLiteContext context, ILogger<DbService> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         #region statistics methods
@@ -24,6 +27,7 @@ namespace Pexip.Monitoring.Web
         /// <returns>ConferenceModel</returns>
         public ConferenceModel GetConferenceStatistics()
         {
+            _logger.LogInformation("Getting ConferenceStatistics from the DB");
             ICollection<ConferenceStatisticsModel> conferenceTotalsPerHour = new List<ConferenceStatisticsModel>();
 
             int hour = 0;
@@ -69,6 +73,7 @@ namespace Pexip.Monitoring.Web
         /// <returns>ConferenceModel</returns>
         public ConferenceModel GetConferenceStatistics(DateTimeOffset date)
         {
+            _logger.LogInformation("Getting ConferenceStatistics from the DB with date");
             ICollection<ConferenceStatisticsModel> conferenceTotalsPerHour = new List<ConferenceStatisticsModel>();
 
             int hour = 0;
@@ -115,6 +120,7 @@ namespace Pexip.Monitoring.Web
         /// <returns>ConferencesPerDayModel</returns>
         public ConferencesPerDayModel GetConferenceStatisticsPerDay(DateTimeOffset startDate, DateTimeOffset endDate)
         {
+            _logger.LogInformation("Getting GetConferenceStatisticsPerDay from the DB");
             ICollection<ConferenceStatisticsPerDayModel> conferenceTotalsPerDay = new List<ConferenceStatisticsPerDayModel>();
 
             int numOfDays = (endDate - startDate).Days + 1;
@@ -160,6 +166,7 @@ namespace Pexip.Monitoring.Web
         /// <returns>ParticipantQualityTotals</returns>
         public ParticipantQualityTotals GetParticipantQualityTotals()
         {
+            _logger.LogInformation("Getting GetParticipantQualityTotals from the DB");
             ICollection<ParticipantQualityTotalsModel> qualityTotalsPerHour = new List<ParticipantQualityTotalsModel>();
 
             int hour = 0;
@@ -223,6 +230,7 @@ namespace Pexip.Monitoring.Web
         /// <returns>ParticipantQualityTotals</returns>
         public ParticipantQualityTotals GetParticipantQualityTotals(DateTimeOffset date)
         {
+            _logger.LogInformation("Getting GetParticipantQualityTotals from the DB with date");
             ICollection<ParticipantQualityTotalsModel> qualityTotalsPerHour = new List<ParticipantQualityTotalsModel>();
 
             int hour = 0;
@@ -287,6 +295,7 @@ namespace Pexip.Monitoring.Web
         /// <returns>ParticipantQualityTotals</returns>
         public ParticipantQualityTotalsPerDay GetParticipantQualityTotalsPerDay(DateTimeOffset startDate, DateTimeOffset endDate)
         {
+            _logger.LogInformation("Getting GetParticipantQualityTotalsPerDay from the DB");
             ICollection<ParticipantQualityTotalsPerDayModel> qualityTotalsPerDay = new List<ParticipantQualityTotalsPerDayModel>();
 
             int numOfDays = (endDate - startDate).Days + 1;
@@ -355,7 +364,7 @@ namespace Pexip.Monitoring.Web
         /// <returns>ICollection<ParticipantMediaStreamsWithHighLoss></returns>
         public ICollection<ParticipantMediaStreamsWithHighLoss> GetLossyStreams(List<string> remoteAliasFilterList, int packetLossThresholdPercentage=3)
         {
-            
+            _logger.LogInformation("Getting GetLossyStreams from the DB with remoteAliasFilterList and packetLossThresholdPercentage");
             var today = new DateTimeOffset(DateTimeOffset.UtcNow.ToLocalTime().Date).ToUnixTimeSeconds();
             var tomorrow = new DateTimeOffset(DateTimeOffset.UtcNow.ToLocalTime().Date).AddDays(1).ToUnixTimeSeconds();
 
@@ -411,7 +420,7 @@ namespace Pexip.Monitoring.Web
         /// <returns>ICollection<ParticipantMediaStreamsWithHighLoss></returns>
         public ICollection<ParticipantMediaStreamsWithHighLoss> GetLossyStreams(List<string> remoteAliasFilterList, string protocolFilter, int packetLossThresholdPercentage = 3)
         {
-
+            _logger.LogInformation("Getting GetLossyStreams from the DB with remoteAliasFilterList, protocolFilter, and packetLossThresholdPercentage");
             var today = new DateTimeOffset(DateTimeOffset.UtcNow.ToLocalTime().Date).ToUnixTimeSeconds();
             var tomorrow = new DateTimeOffset(DateTimeOffset.UtcNow.ToLocalTime().Date).AddDays(1).ToUnixTimeSeconds();
 
@@ -466,6 +475,7 @@ namespace Pexip.Monitoring.Web
         /// <returns></returns>
         public ICollection<ParticipantMediaStreamsWithHighLoss> GetLossyStreams(List<string> remoteAliasFilterList, DateTimeOffset date, int packetLossThresholdPercentage = 3)
         {
+            _logger.LogInformation("Getting GetLossyStreams from the DB with remoteAliasFilterList, date, and packetLossThresholdPercentage");
             var today = date.ToUnixTimeSeconds();
             var tomorrow = date.AddDays(1).ToUnixTimeSeconds();
 
@@ -522,6 +532,7 @@ namespace Pexip.Monitoring.Web
         /// <returns></returns>
         public ICollection<ParticipantMediaStreamsWithHighLoss> GetLossyStreams(List<string> remoteAliasFilterList, DateTimeOffset date, string protocolFilter, int packetLossThresholdPercentage = 3)
         {
+            _logger.LogInformation("Getting GetLossyStreams from the DB with remoteAliasFilterList, date, protocolFilter, and packetLossThresholdPercentage");
             var today = date.ToUnixTimeSeconds();
             var tomorrow = date.AddDays(1).ToUnixTimeSeconds();
 

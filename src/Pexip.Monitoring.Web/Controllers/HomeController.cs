@@ -3,6 +3,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Pexip.Monitoring.Web.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Pexip.Monitoring.Web.Controllers
 {
@@ -10,28 +11,35 @@ namespace Pexip.Monitoring.Web.Controllers
     {
         private readonly DbService _service;
         private readonly IOptions<AppConfiguration> _config;
+        private readonly ILogger<HomeController> _logger;
 
-        public HomeController(DbService service, IOptions<AppConfiguration> config)
+        public HomeController(DbService service, IOptions<AppConfiguration> config, ILogger<HomeController> logger)
         {
             _service = service;
             _config = config;
+            _logger = logger;
         }
 
         [HttpGet]
         public IActionResult Index()
         {
+            _logger.LogInformation("GET request received to index page");
             return View("~/Views/Home/IndexGET.cshtml");
         }
 
         [HttpGet("/rangedreport")]
         public IActionResult RangedReport()
         {
+            _logger.LogInformation("GET request received to ranged report page");
             return View("~/Views/Home/RangedReportGET.cshtml");
         }
 
         [HttpPost("/rangedreport")]
         public IActionResult RangedReportWithDates()
         {
+            _logger.LogInformation("POST request received to ranged report page");
+            _logger.LogInformation($"requested range start {Request.Form["reportDateStart"]}");
+            _logger.LogInformation($"requested range end {Request.Form["reportDateEnd"]}");
             return View("~/Views/Home/RangedReportPOST.cshtml", new StatisticsPerDayViewModel
             {
                 ParticipantQualityTotals = _service.GetParticipantQualityTotalsPerDay(
@@ -46,6 +54,8 @@ namespace Pexip.Monitoring.Web.Controllers
         [HttpPost("/")]
         public IActionResult IndexWithDate()
         {
+            _logger.LogInformation("POST request received to index page");
+            _logger.LogInformation($"requested date {Request.Form["reportdate"]}");
             return View("~/Views/Home/IndexPOST.cshtml", new StatisticsViewModel
             {
                 ParticipantQualityTotals = _service.GetParticipantQualityTotals(

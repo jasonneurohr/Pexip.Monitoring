@@ -11,15 +11,14 @@
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    <PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
+    <PackageReference Include="Serilog.Settings.AppSettings" Version="2.2.2" />
+    <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
   </ItemGroup>
 
   <Target Name="CreateLogsFolder" AfterTargets="Publish">
-   <MakeDir Directories="$(PublishDir)Logs" 
-            Condition="!Exists('$(PublishDir)Logs')" />
-   <WriteLinesToFile File="$(PublishDir)Logs\.log" 
-                     Lines="Generated file" 
-                     Overwrite="True" 
-                     Condition="!Exists('$(PublishDir)Logs\.log')" />
+   <MakeDir Directories="$(PublishDir)Logs" Condition="!Exists('$(PublishDir)Logs')" />
+   <WriteLinesToFile File="$(PublishDir)Logs\.log" Lines="Generated file" Overwrite="True" Condition="!Exists('$(PublishDir)Logs\.log')" />
   </Target>
 
 </Project>
